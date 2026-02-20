@@ -30,6 +30,12 @@ export class ListingsController {
     return this.listingsService.findAll();
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('my')
+  findMy(@Request() req) {
+    return this.listingsService.findByHost(req.user.userId);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.listingsService.findOne(id);

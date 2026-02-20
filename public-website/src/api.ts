@@ -54,6 +54,36 @@ export async function getListing(id: number) {
   return api<import('./types').Listing>(`/listings/${id}`);
 }
 
+export async function getMyListings() {
+  return api<import('./types').Listing[]>('/listings/my');
+}
+
+export async function createListing(data: {
+  title: string;
+  description: string;
+  price: number;
+  location: string;
+}) {
+  return api<import('./types').Listing>('/listings', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateListing(
+  id: number,
+  data: { title?: string; description?: string; price?: number; location?: string }
+) {
+  return api<import('./types').Listing>(`/listings/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteListing(id: number) {
+  return api<void>(`/listings/${id}`, { method: 'DELETE' });
+}
+
 // Bookings
 export async function getBookings() {
   return api<import('./types').Booking[]>('/bookings');

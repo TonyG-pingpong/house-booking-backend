@@ -20,6 +20,12 @@ export class ListingsService {
     return this.prisma.listing.findMany();
   }
 
+  findByHost(userId: number) {
+    return this.prisma.listing.findMany({
+      where: { hostId: userId },
+    });
+  }
+
   findOne(id: number) {
     return this.prisma.listing.findUniqueOrThrow({
       where: { id },

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getListings } from '../api';
+import { getListings, getImageUrl } from '../api';
 import type { Listing } from '../types';
 
 export function Listings() {
@@ -28,7 +28,15 @@ export function Listings() {
             to={`/listings/${listing.id}`}
             className="listing-card"
           >
-            <div className="listing-card-image" />
+            {listing.imageUrl ? (
+              <img
+                src={getImageUrl(listing.imageUrl)}
+                alt=""
+                className="listing-card-image"
+              />
+            ) : (
+              <div className="listing-card-image listing-card-image-placeholder" />
+            )}
             <div className="listing-card-body">
               <span className="listing-location">{listing.location}</span>
               <h3>{listing.title}</h3>

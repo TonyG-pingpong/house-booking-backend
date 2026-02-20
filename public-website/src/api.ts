@@ -24,6 +24,13 @@ export async function api<T>(
   return res.json();
 }
 
+export function getImageUrl(imageUrl: string | null | undefined): string {
+  if (!imageUrl) return '';
+  if (imageUrl.startsWith('http')) return imageUrl;
+  const base = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+  return `${base}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+}
+
 // Auth
 export async function signup(email: string, password: string) {
   return api<{ access_token: string }>('/auth/signup', {
@@ -58,11 +65,28 @@ export async function getMyListings() {
   return api<import('./types').Listing[]>('/listings/my');
 }
 
+export async function uploadListingImage(file: File): Promise<{ url: string }> {
+  const token = localStorage.getItem('access_token');
+  const formData = new FormData();
+  formData.append('image', file);
+  const res = await fetch(`${API_BASE}/listings/upload`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: res.statusText }));
+    throw new Error(err.message ?? res.statusText);
+  }
+  return res.json();
+}
+
 export async function createListing(data: {
   title: string;
   description: string;
   price: number;
   location: string;
+  imageUrl?: string;
 }) {
   return api<import('./types').Listing>('/listings', {
     method: 'POST',
@@ -72,7 +96,7 @@ export async function createListing(data: {
 
 export async function updateListing(
   id: number,
-  data: { title?: string; description?: string; price?: number; location?: string }
+  data: { title?: string; description?: string; price?: number; location?: string; imageUrl?: string }
 ) {
   return api<import('./types').Listing>(`/listings/${id}`, {
     method: 'PATCH',

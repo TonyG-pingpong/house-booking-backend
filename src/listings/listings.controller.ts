@@ -9,7 +9,13 @@ import {
   ParseIntPipe,
   UseGuards,
   Request,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { ListingsService } from './listings.service';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
@@ -34,6 +40,38 @@ export class ListingsController {
   @Get('my')
   findMy(@Request() req) {
     return this.listingsService.findByHost(req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('upload')
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (_req, file, cb) => {
+          const name = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          cb(null, `${name}${extname(file.originalname) || '.jpg'}`);
+        },
+      }),
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+      fileFilter: (_req, file, cb) => {
+        const allowed = /^image\/(jpeg|png|gif|webp)$/;
+        if (allowed.test(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new BadRequestException('Only images (JPEG, PNG, GIF, WebP) allowed'), false);
+        }
+      },
+    }),
+  )
+  uploadImage(@UploadedFile() file: { filename: string } | undefined) {
+    if (!file) {
+      throw new BadRequestException('No image file provided');
+    }
+    return { url: `/uploads/${file.filename}` };
   }
 
   @Get(':id')

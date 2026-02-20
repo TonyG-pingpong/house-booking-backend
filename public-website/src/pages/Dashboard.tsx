@@ -5,6 +5,8 @@ import {
   createListing,
   updateListing,
   deleteListing,
+  uploadListingImage,
+  getImageUrl,
 } from '../api';
 import { useAuth } from '../AuthContext';
 import type { Listing } from '../types';
@@ -14,6 +16,7 @@ const emptyForm = {
   description: '',
   price: '',
   location: '',
+  imageUrl: '',
 };
 
 export function Dashboard() {
@@ -25,6 +28,7 @@ export function Dashboard() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
 
   const load = useCallback(() => {
     if (!user) {
@@ -55,6 +59,7 @@ export function Dashboard() {
       description: listing.description,
       price: String(listing.price),
       location: listing.location,
+      imageUrl: listing.imageUrl ?? '',
     });
     setFormOpen(true);
     setError('');
@@ -64,6 +69,22 @@ export function Dashboard() {
     setFormOpen(false);
     setEditingId(null);
     setForm(emptyForm);
+  };
+
+  const handleImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageUploading(true);
+    setError('');
+    try {
+      const { url } = await uploadListingImage(file);
+      setForm((f) => ({ ...f, imageUrl: url }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Image upload failed');
+    } finally {
+      setImageUploading(false);
+      e.target.value = '';
+    }
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -76,12 +97,14 @@ export function Dashboard() {
     setError('');
     setSubmitLoading(true);
     try {
+      const imageUrl = form.imageUrl.trim() || undefined;
       if (editingId) {
         await updateListing(editingId, {
           title: form.title,
           description: form.description,
           price,
           location: form.location,
+          imageUrl,
         });
       } else {
         await createListing({
@@ -89,6 +112,7 @@ export function Dashboard() {
           description: form.description,
           price,
           location: form.location,
+          imageUrl,
         });
       }
       closeForm();
@@ -162,6 +186,36 @@ export function Dashboard() {
             />
           </label>
           <label>
+            Image (URL or upload)
+            <div className="image-field">
+              <input
+                type="text"
+                placeholder="Paste image URL or upload below"
+                value={form.imageUrl}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, imageUrl: e.target.value }))
+                }
+              />
+              <label className="file-upload-btn">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  onChange={handleImageFile}
+                  disabled={imageUploading}
+                />
+                {imageUploading ? 'Uploading…' : 'Upload image'}
+              </label>
+              {form.imageUrl && (
+                <img
+                  src={getImageUrl(form.imageUrl)}
+                  alt="Preview"
+                  className="listing-form-preview"
+                  onError={(e) => (e.currentTarget.style.display = 'none')}
+                />
+              )}
+            </div>
+          </label>
+          <label>
             Description
             <textarea
               value={form.description}
@@ -186,6 +240,13 @@ export function Dashboard() {
       <div className="dashboard-list">
         {listings.map((listing) => (
           <div key={listing.id} className="dashboard-card card">
+            {listing.imageUrl && (
+              <img
+                src={getImageUrl(listing.imageUrl)}
+                alt=""
+                className="dashboard-card-image"
+              />
+            )}
             <div className="dashboard-card-main">
               <h3>{listing.title}</h3>
               <p className="dashboard-card-location">{listing.location}</p>

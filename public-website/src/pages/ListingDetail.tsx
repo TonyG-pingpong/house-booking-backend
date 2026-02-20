@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getListing } from '../api';
+import { getListing, getImageUrl } from '../api';
 import { useAuth } from '../AuthContext';
 import { createBooking } from '../api';
 import type { Listing } from '../types';
@@ -54,7 +54,15 @@ export function ListingDetail() {
 
   return (
     <div className="listing-detail">
-      <div className="listing-detail-hero" />
+      {listing.imageUrl ? (
+        <img
+          src={getImageUrl(listing.imageUrl)}
+          alt=""
+          className="listing-detail-hero listing-detail-hero-img"
+        />
+      ) : (
+        <div className="listing-detail-hero" />
+      )}
       <div className="listing-detail-content">
         <h1>{listing.title}</h1>
         <p className="listing-detail-location">{listing.location}</p>

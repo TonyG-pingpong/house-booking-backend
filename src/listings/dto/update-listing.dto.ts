@@ -16,4 +16,8 @@ export class UpdateListingDto {
   @IsOptional()
   @IsString()
   location?: string;
+
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
 }

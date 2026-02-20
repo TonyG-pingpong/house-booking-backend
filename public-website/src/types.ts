@@ -4,6 +4,7 @@ export interface Listing {
   description: string;
   price: number;
   location: string;
+  imageUrl?: string | null;
   createdAt: string;
   hostId: number;
 }

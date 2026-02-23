@@ -19,6 +19,18 @@ export interface Booking {
   listing?: Listing;
 }
 
+export interface Message {
+  id: number;
+  content: string;
+  createdAt: string;
+  senderId: number;
+  receiverId: number;
+  listingId: number | null;
+  sender?: { id: number; email: string };
+  receiver?: { id: number; email: string };
+  listing?: { id: number; title: string } | null;
+}
+
 export interface AuthProfile {
   userId: number;
   email: string;

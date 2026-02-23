@@ -57,6 +57,44 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Running on your home network
+
+To let other devices on your network (e.g. family) use Stay & Book:
+
+1. **Find your computer’s IP**  
+   - Windows: `ipconfig` → use the **IPv4 Address** (e.g. `192.168.1.100`).  
+   - Mac/Linux: `ip addr` or `ifconfig` → use the LAN address (e.g. `192.168.1.100`).
+
+2. **Point the frontend at the backend on your IP**  
+   In `public-website`, create or edit `.env`:
+   ```env
+   VITE_API_URL=http://YOUR_IP:3000
+   ```
+   Example: `VITE_API_URL=http://192.168.1.100:3000`
+
+3. **Start the backend** (from project root):
+   ```bash
+   npm run start:dev
+   ```
+   It listens on all interfaces, so other devices can reach it.
+
+4. **Start the frontend for network access** (from `public-website`):
+   ```bash
+   npm run dev:network
+   ```
+   This runs the dev server so it’s reachable at `http://YOUR_IP:5173`.
+
+5. **On other devices**  
+   Open a browser and go to:
+   ```text
+   http://YOUR_IP:5173
+   ```
+   Example: `http://192.168.1.100:5173`
+
+Everyone can sign up, add listings, book, and use messages. Each person uses their own account.
+
+---
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.

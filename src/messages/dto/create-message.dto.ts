@@ -5,9 +5,6 @@ export class CreateMessageDto {
   content: string;
 
   @IsInt()
-  senderId: number;
-
-  @IsInt()
   receiverId: number;
 
   @IsOptional()

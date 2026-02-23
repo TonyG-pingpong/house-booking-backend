@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getProfile } from './api';
 import type { AuthProfile } from './types';
 
@@ -20,6 +21,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
   const [user, setUser] = useState<AuthProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -54,7 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     localStorage.removeItem('access_token');
     setUser(null);
-  }, []);
+    navigate('/');
+  }, [navigate]);
 
   return (
     <AuthContext.Provider

@@ -19,6 +19,7 @@ export function Layout() {
             <>
               <Link to="/dashboard">Dashboard</Link>
               <Link to="/my-bookings">My Bookings</Link>
+              <Link to="/messages">Messages</Link>
               <span className="user-email">{user.email}</span>
               <button type="button" className="btn btn-ghost" onClick={logout}>
                 Log out

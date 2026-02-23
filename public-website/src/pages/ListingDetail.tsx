@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getListing, getImageUrl } from '../api';
 import { useAuth } from '../AuthContext';
 import { createBooking } from '../api';
@@ -71,6 +71,19 @@ export function ListingDetail() {
         </p>
         <p className="listing-detail-desc">{listing.description}</p>
 
+        {user && user.userId !== listing.hostId && (
+          <Link
+            to="/messages"
+            state={{
+              receiverId: listing.hostId,
+              listingId: listing.id,
+              listingTitle: listing.title,
+            }}
+            className="btn btn-ghost contact-host-btn"
+          >
+            Contact host
+          </Link>
+        )}
         {user ? (
           <form className="booking-form" onSubmit={handleBook}>
             <h3>Book this place</h3>

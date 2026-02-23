@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
@@ -27,8 +28,8 @@ export class MessagesController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll(@Request() req) {
-    return this.messagesService.findAll(req.user.userId);
+  findAll(@Request() req, @Query('since') since?: string) {
+    return this.messagesService.findAll(req.user.userId, since);
   }
 
   @UseGuards(JwtAuthGuard)

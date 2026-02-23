@@ -4,6 +4,7 @@ import { Layout } from './components/Layout';
 import { Listings } from './pages/Listings';
 import { ListingDetail } from './pages/ListingDetail';
 import { MyBookings } from './pages/MyBookings';
+import { Messages } from './pages/Messages';
 import { Dashboard } from './pages/Dashboard';
 import './App.css';
 
@@ -16,6 +17,7 @@ function App() {
             <Route index element={<Listings />} />
             <Route path="listings/:id" element={<ListingDetail />} />
             <Route path="my-bookings" element={<MyBookings />} />
+            <Route path="messages" element={<Messages />} />
             <Route path="dashboard" element={<Dashboard />} />
           </Route>
         </Routes>

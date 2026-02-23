@@ -3,6 +3,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
 
+const messageInclude = {
+  sender: { select: { id: true, email: true } },
+  receiver: { select: { id: true, email: true } },
+  listing: { select: { id: true, title: true } },
+};
+
 @Injectable()
 export class MessagesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -10,26 +16,39 @@ export class MessagesService {
   create(createMessageDto: CreateMessageDto, userId: number) {
     return this.prisma.message.create({
       data: {
-        ...createMessageDto,
+        content: createMessageDto.content,
+        receiverId: createMessageDto.receiverId,
+        listingId: createMessageDto.listingId,
         senderId: userId,
       },
+      include: messageInclude,
     });
   }
 
-  findAll(userId: number) {
+  findAll(userId: number, since?: string) {
+    const where: Record<string, unknown> = {
+      OR: [
+        { senderId: userId },
+        { receiverId: userId },
+      ],
+    };
+    if (since) {
+      const sinceDate = new Date(since);
+      if (!Number.isNaN(sinceDate.getTime())) {
+        where.createdAt = { gt: sinceDate };
+      }
+    }
     return this.prisma.message.findMany({
-      where: {
-        OR: [
-          { senderId: userId },
-          { receiverId: userId },
-        ],
-      },
+      where,
+      include: messageInclude,
+      orderBy: { createdAt: 'desc' },
     });
   }
 
   async findOne(id: number, userId: number) {
     const message = await this.prisma.message.findUnique({
       where: { id },
+      include: messageInclude,
     });
 
     if (!message) {
@@ -59,6 +78,7 @@ export class MessagesService {
     return this.prisma.message.update({
       where: { id },
       data: updateMessageDto,
+      include: messageInclude,
     });
   }
 

@@ -108,6 +108,40 @@ export async function deleteListing(id: number) {
   return api<void>(`/listings/${id}`, { method: 'DELETE' });
 }
 
+// Messages
+export async function getMessages(since?: string) {
+  const path = since
+    ? `/messages?since=${encodeURIComponent(since)}`
+    : '/messages';
+  return api<import('./types').Message[]>(path);
+}
+
+export async function getMessage(id: number) {
+  return api<import('./types').Message>(`/messages/${id}`);
+}
+
+export async function createMessage(data: {
+  content: string;
+  receiverId: number;
+  listingId?: number;
+}) {
+  return api<import('./types').Message>('/messages', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateMessage(id: number, data: { content?: string }) {
+  return api<import('./types').Message>(`/messages/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteMessage(id: number) {
+  return api<void>(`/messages/${id}`, { method: 'DELETE' });
+}
+
 // Bookings
 export async function getBookings() {
   return api<import('./types').Booking[]>('/bookings');

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getImageUrl, getMessages } from './api';
+import { getImageUrl, getMessages, deleteMessageThread } from './api';
 
 describe('getImageUrl', () => {
   it('returns empty string for null or undefined', () => {
@@ -67,5 +67,69 @@ describe('getMessages (instant chat)', () => {
     expect((fetch as ReturnType<typeof vi.fn>).mock.calls[0][0]).toContain(
       encodeURIComponent(since)
     );
+  });
+});
+
+describe('deleteMessageThread', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn());
+    vi.stubGlobal('localStorage', { getItem: vi.fn(() => 'fake-token'), setItem: vi.fn(), removeItem: vi.fn() });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('calls DELETE /messages/thread with otherUserId query param', async () => {
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ deleted: 2 }),
+    });
+    const result = await deleteMessageThread(5);
+    expect(result).toEqual({ deleted: 2 });
+    const url = (fetch as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(url).toContain('/messages/thread');
+    expect(url).toContain('otherUserId=5');
+    expect((fetch as ReturnType<typeof vi.fn>).mock.calls[0][1]).toMatchObject({
+      method: 'DELETE',
+    });
+  });
+
+  it('includes listingId in query when provided and not zero', async () => {
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ deleted: 3 }),
+    });
+    await deleteMessageThread(10, 20);
+    const url = (fetch as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(url).toContain('otherUserId=10');
+    expect(url).toContain('listingId=20');
+  });
+
+  it('omits listingId when null or zero', async () => {
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ deleted: 1 }),
+    });
+    await deleteMessageThread(1, null);
+    let url = (fetch as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(url).not.toContain('listingId=');
+
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ deleted: 1 }),
+    });
+    await deleteMessageThread(1, 0);
+    url = (fetch as ReturnType<typeof vi.fn>).mock.calls[1][0];
+    expect(url).not.toContain('listingId=');
+  });
+
+  it('throws when response is not ok', async () => {
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: false,
+      statusText: 'Forbidden',
+      json: () => Promise.resolve({ message: 'Forbidden' }),
+    });
+    await expect(deleteMessageThread(1)).rejects.toThrow();
   });
 });

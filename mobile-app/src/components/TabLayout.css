@@ -1,0 +1,71 @@
+.tab-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: 56px;
+}
+
+.tab-main {
+  flex: 1;
+  padding: 0.75rem 1rem 1rem;
+}
+
+.tab-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  background: #1a1a1a;
+  color: #fff;
+  padding: 0.25rem 0;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tab-link {
+  flex: 1;
+  text-align: center;
+  padding: 0.5rem 0.25rem;
+  text-decoration: none;
+  color: #aaa;
+  font-size: 0.8rem;
+  border-radius: 4px;
+}
+
+.tab-link.active {
+  color: #fff;
+  font-weight: 600;
+}
+
+.tab-link:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* On desktop: center the app and make nav bar more readable */
+@media (min-width: 600px) {
+  .tab-layout {
+    max-width: 560px;
+    margin: 0 auto;
+    padding-bottom: 64px;
+  }
+  .tab-main {
+    padding: 1rem 1.25rem 1.25rem;
+  }
+  .tab-nav {
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 560px;
+    width: 100%;
+    padding: 0.4rem 0;
+    border-radius: 12px 12px 0 0;
+    margin: 0 auto;
+  }
+  .tab-link {
+    font-size: 0.95rem;
+    padding: 0.6rem 0.25rem;
+  }
+}

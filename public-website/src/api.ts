@@ -142,6 +142,15 @@ export async function deleteMessage(id: number) {
   return api<void>(`/messages/${id}`, { method: 'DELETE' });
 }
 
+/** Delete an entire message thread (all messages with one other user, optionally about one listing). */
+export async function deleteMessageThread(otherUserId: number, listingId?: number | null) {
+  const params = new URLSearchParams({ otherUserId: String(otherUserId) });
+  if (listingId != null && listingId !== 0) {
+    params.set('listingId', String(listingId));
+  }
+  return api<{ deleted: number }>(`/messages/thread?${params}`, { method: 'DELETE' });
+}
+
 // Bookings
 export async function getBookings() {
   return api<import('./types').Booking[]>('/bookings');

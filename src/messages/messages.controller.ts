@@ -33,6 +33,21 @@ export class MessagesController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Delete('thread')
+  removeThread(
+    @Request() req,
+    @Query('otherUserId', ParseIntPipe) otherUserId: number,
+    @Query('listingId') listingId?: string,
+  ) {
+    const listingIdNum = listingId != null && listingId !== '' ? parseInt(listingId, 10) : undefined;
+    return this.messagesService.removeThread(
+      req.user.userId,
+      otherUserId,
+      Number.isNaN(listingIdNum) ? undefined : listingIdNum,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number, @Request() req) {
     return this.messagesService.findOne(id, req.user.userId);

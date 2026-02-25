@@ -1,0 +1,31 @@
+.home-page {
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.home-page h1 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.home-welcome {
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.home-placeholder {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.home-logout {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  background: transparent;
+  color: #666;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+}

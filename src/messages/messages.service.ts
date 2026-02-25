@@ -99,4 +99,25 @@ export class MessagesService {
       where: { id },
     });
   }
+
+  /** Delete all messages in a thread (conversation with one other user, optionally about one listing). */
+  async removeThread(userId: number, otherUserId: number, listingId?: number | null) {
+    const listingFilter = listingId == null || listingId === 0 ? null : listingId;
+    const where = {
+      OR: [
+        {
+          senderId: userId,
+          receiverId: otherUserId,
+          ...(listingFilter !== null ? { listingId: listingFilter } : { listingId: null }),
+        },
+        {
+          senderId: otherUserId,
+          receiverId: userId,
+          ...(listingFilter !== null ? { listingId: listingFilter } : { listingId: null }),
+        },
+      ],
+    };
+    const result = await this.prisma.message.deleteMany({ where });
+    return { deleted: result.count };
+  }
 }

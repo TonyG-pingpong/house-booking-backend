@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { getMessages, createMessage } from '../api';
+import { getMessages, createMessage, deleteMessageThread } from '../api';
 import { useAuth } from '../AuthContext';
 import { usePolling } from '../hooks/usePolling';
 import type { Message } from '../types';
 
 const INSTANT_CHAT_POLL_INTERVAL_MS = 5000;
 
-type ComposeState = {
+/** When user arrives via "Contact host", we show an inline compose for that recipient until they send. */
+type PendingNewThread = {
   receiverId: number;
-  receiverEmail?: string;
   listingId?: number;
   listingTitle?: string;
 };
@@ -50,12 +50,14 @@ export function Messages() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [compose, setCompose] = useState<ComposeState | null>(null);
-  const [replyContent, setReplyContent] = useState('');
-  const [sending, setSending] = useState(false);
+  const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
+  const [sendingThreadKey, setSendingThreadKey] = useState<string | null>(null);
   const [sendError, setSendError] = useState('');
-  const composeRef = useRef<HTMLDivElement>(null);
-  const replyTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const [pendingNewThread, setPendingNewThread] = useState<PendingNewThread | null>(null);
+  const [deletingThreadKey, setDeletingThreadKey] = useState<string | null>(null);
+  const threadContainerRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const firstThreadRef = useRef<HTMLDivElement>(null);
+  const prevMessageCountRef = useRef(0);
 
   const load = useCallback(() => {
     if (!user) {
@@ -71,7 +73,7 @@ export function Messages() {
   // Instant chat: poll for new messages every 5s when user is logged in
   usePolling(load, INSTANT_CHAT_POLL_INTERVAL_MS, !!user);
 
-  // Pre-fill compose from "Contact host" navigation state
+  // From "Contact host": show inline compose for that recipient (no thread yet)
   useEffect(() => {
     const state = location.state as {
       receiverId?: number;
@@ -79,7 +81,7 @@ export function Messages() {
       listingTitle?: string;
     } | null;
     if (state?.receiverId) {
-      setCompose({
+      setPendingNewThread({
         receiverId: state.receiverId,
         listingId: state.listingId,
         listingTitle: state.listingTitle,
@@ -88,39 +90,60 @@ export function Messages() {
     }
   }, [location.state, location.pathname, navigate]);
 
-  // When compose opens: scroll it into view and focus the textarea
-  useEffect(() => {
-    if (!compose) return;
-    const t = setTimeout(() => {
-      composeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      replyTextareaRef.current?.focus();
-    }, 100);
-    return () => clearTimeout(t);
-  }, [compose]);
-
-  const closeCompose = () => {
-    setCompose(null);
-    setReplyContent('');
-    setSendError('');
-  };
-
-  const handleSend = async (e: React.FormEvent) => {
+  const sendMessage = async (
+    e: React.FormEvent,
+    threadKey: string,
+    payload: { receiverId: number; listingId?: number }
+  ) => {
     e.preventDefault();
-    if (!compose || !replyContent.trim()) return;
+    const content = replyDrafts[threadKey]?.trim();
+    if (!content) return;
     setSendError('');
-    setSending(true);
+    setSendingThreadKey(threadKey);
     try {
       await createMessage({
-        content: replyContent.trim(),
-        receiverId: compose.receiverId,
-        listingId: compose.listingId,
+        content,
+        receiverId: payload.receiverId,
+        listingId: payload.listingId,
       });
-      closeCompose();
+      setReplyDrafts((d) => ({ ...d, [threadKey]: '' }));
+      if (threadKey.startsWith('new-')) setPendingNewThread(null);
       load();
     } catch (err) {
       setSendError(err instanceof Error ? err.message : 'Failed to send');
     } finally {
-      setSending(false);
+      setSendingThreadKey(null);
+    }
+  };
+
+  const handleComposeKeyDown = (
+    e: React.KeyboardEvent,
+    threadKey: string,
+    payload: { receiverId: number; listingId?: number }
+  ) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      const content = replyDrafts[threadKey]?.trim();
+      if (content) {
+        sendMessage(
+          { preventDefault: () => {} } as React.FormEvent,
+          threadKey,
+          payload
+        );
+      }
+    }
+  };
+
+  const handleDeleteThread = async (threadKey: string, otherUserId: number, listingId?: number | null) => {
+    if (!window.confirm('Delete this entire conversation? This cannot be undone.')) return;
+    setDeletingThreadKey(threadKey);
+    try {
+      await deleteMessageThread(otherUserId, listingId);
+      load();
+    } catch {
+      setError('Failed to delete thread');
+    } finally {
+      setDeletingThreadKey(null);
     }
   };
 
@@ -133,20 +156,63 @@ export function Messages() {
     [messages, user]
   );
 
-  const openReplyToThread = (thread: Message[]) => {
-    const first = thread[0];
-    const otherId = first.senderId === user!.userId ? first.receiverId : first.senderId;
-    const otherEmail = first.senderId === user!.userId
-      ? first.receiver?.email
-      : first.sender?.email;
-    setCompose({
-      receiverId: otherId,
-      receiverEmail: otherEmail,
-      listingId: first.listingId ?? undefined,
-      listingTitle: first.listing?.title,
+  // Auto-scroll each thread's message list to bottom so new messages are visible
+  useEffect(() => {
+    threadContainerRefs.current.forEach((el) => {
+      el.scrollTop = el.scrollHeight;
     });
-    setReplyContent('');
-    setSendError('');
+  }, [messages]);
+
+  // When new messages arrive, scroll the thread with latest activity into view
+  useEffect(() => {
+    if (messages.length > prevMessageCountRef.current) {
+      firstThreadRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      prevMessageCountRef.current = messages.length;
+    } else {
+      prevMessageCountRef.current = messages.length;
+    }
+  }, [messages.length]);
+
+  /** Stable key for a thread (same other party + listing). */
+  const getThreadKey = (first: Message) => {
+    const otherId = first.senderId === user!.userId ? first.receiverId : first.senderId;
+    return `${otherId}-${first.listingId ?? 0}`;
+  };
+
+  /** Inline chat row: textarea + Send. Enter sends, Shift+Enter newline. */
+  const renderChatInput = (
+    threadKey: string,
+    payload: { receiverId: number; listingId?: number },
+    placeholder = 'Type a message…'
+  ) => {
+    const isSending = sendingThreadKey === threadKey;
+    return (
+      <form
+        className="message-thread-compose"
+        onSubmit={(e) => sendMessage(e, threadKey, payload)}
+      >
+        <textarea
+          className="message-thread-compose-input"
+          placeholder={placeholder}
+          value={replyDrafts[threadKey] ?? ''}
+          onChange={(e) =>
+            setReplyDrafts((d) => ({ ...d, [threadKey]: e.target.value }))
+          }
+          onKeyDown={(e) => handleComposeKeyDown(e, threadKey, payload)}
+          rows={1}
+          aria-label="Message"
+          disabled={isSending}
+        />
+        <button
+          type="submit"
+          className="btn btn-primary message-thread-compose-send"
+          disabled={isSending || !(replyDrafts[threadKey]?.trim())}
+          aria-label="Send"
+        >
+          {isSending ? '…' : 'Send'}
+        </button>
+      </form>
+    );
   };
 
   if (!user) {
@@ -174,52 +240,47 @@ export function Messages() {
         </span>
       </h1>
 
-      {compose && (
-        <div className="messages-compose card" ref={composeRef}>
-          <h3>
-            {compose.receiverEmail
-              ? `Message ${compose.receiverEmail}`
-              : compose.listingTitle
-                ? `Message host about "${compose.listingTitle}"`
+      {pendingNewThread && (
+        <div className="message-thread card message-thread-new">
+          <div className="message-thread-header">
+            <div className="message-thread-title">
+              {pendingNewThread.listingTitle
+                ? `Message host about "${pendingNewThread.listingTitle}"`
                 : 'New message'}
-          </h3>
-          {compose.listingTitle && (
-            <p className="messages-compose-context">
-              About: <Link to={`/listings/${compose.listingId}`}>{compose.listingTitle}</Link>
+            </div>
+          </div>
+          {pendingNewThread.listingId && (
+            <p className="messages-compose-context" style={{ padding: '0 1.25rem' }}>
+              About: <Link to={`/listings/${pendingNewThread.listingId}`}>{pendingNewThread.listingTitle}</Link>
             </p>
           )}
-          <form onSubmit={handleSend}>
-            <label>
-              Message
-              <textarea
-                ref={replyTextareaRef}
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                placeholder="Type your message…"
-                rows={3}
-                required
-              />
-            </label>
-            {sendError && <p className="form-error">{sendError}</p>}
-            <div className="form-actions">
-              <button type="submit" className="btn btn-primary" disabled={sending}>
-                {sending ? 'Sending…' : 'Send'}
-              </button>
-              <button type="button" className="btn btn-ghost" onClick={closeCompose}>
-                Cancel
-              </button>
-            </div>
-          </form>
+          {sendError && <p className="form-error" style={{ margin: '0 1.25rem' }}>{sendError}</p>}
+          {renderChatInput(
+            `new-${pendingNewThread.receiverId}-${pendingNewThread.listingId ?? 0}`,
+            {
+              receiverId: pendingNewThread.receiverId,
+              listingId: pendingNewThread.listingId,
+            }
+          )}
         </div>
       )}
 
       <div className="messages-threads">
-        {threads.map((thread) => {
+        {threads.map((thread, index) => {
           const first = thread[0];
           const other = otherParty(first);
           const lastMsg = thread[thread.length - 1];
+          const threadKey = getThreadKey(first);
+          const setThreadMessagesRef = (el: HTMLDivElement | null) => {
+            if (el) threadContainerRefs.current.set(threadKey, el);
+            else threadContainerRefs.current.delete(threadKey);
+          };
           return (
-            <div key={`thread-${first.id}-${thread.length}`} className="message-thread card">
+            <div
+              key={`thread-${threadKey}`}
+              ref={index === 0 ? firstThreadRef : undefined}
+              className="message-thread card"
+            >
               <div className="message-thread-header">
                 <div className="message-thread-title">
                   <span className="message-thread-with">
@@ -231,11 +292,28 @@ export function Messages() {
                     </span>
                   )}
                 </div>
-                <span className="message-thread-date">
-                  Last: {new Date(lastMsg.createdAt).toLocaleString()}
-                </span>
+                <div className="message-thread-header-right">
+                  <span className="message-thread-date">
+                    Last: {new Date(lastMsg.createdAt).toLocaleString()}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn btn-secondary message-thread-delete"
+                    onClick={() => handleDeleteThread(threadKey, first.senderId === user!.userId ? first.receiverId : first.senderId, first.listingId ?? undefined)}
+                    disabled={deletingThreadKey === threadKey}
+                    aria-label="Delete conversation"
+                    title="Delete this conversation"
+                  >
+                    {deletingThreadKey === threadKey ? '…' : 'Delete'}
+                  </button>
+                </div>
               </div>
-              <div className="message-thread-messages">
+              <div
+                className="message-thread-messages"
+                ref={setThreadMessagesRef}
+                role="log"
+                aria-label="Conversation"
+              >
                 {thread.map((msg) => (
                   <div
                     key={msg.id}
@@ -248,21 +326,19 @@ export function Messages() {
                   </div>
                 ))}
               </div>
-              <div className="message-thread-actions">
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  onClick={() => openReplyToThread(thread)}
-                >
-                  Reply
-                </button>
-              </div>
+              {sendError && sendingThreadKey === threadKey && (
+                <p className="form-error message-thread-compose-error">{sendError}</p>
+              )}
+              {renderChatInput(threadKey, {
+                receiverId: first.senderId === user!.userId ? first.receiverId : first.senderId,
+                listingId: first.listingId ?? undefined,
+              })}
             </div>
           );
         })}
       </div>
 
-      {messages.length === 0 && !compose && (
+      {messages.length === 0 && !pendingNewThread && (
         <p className="empty-state">
           No messages yet. Go to a listing and use <strong>Contact host</strong> to start a conversation.
         </p>

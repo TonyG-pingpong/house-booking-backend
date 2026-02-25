@@ -1,0 +1,97 @@
+.listings-page {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.listings-title {
+  font-size: 1.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.listings-loading,
+.listings-error,
+.listings-empty {
+  padding: 1rem 0;
+  color: #666;
+}
+
+.listings-error {
+  color: #c00;
+}
+
+.listings-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.listings-list li {
+  margin-bottom: 0.75rem;
+}
+
+.listings-card {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f5f5f5;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.listings-card-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.listings-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.listings-card-body strong {
+  font-size: 1rem;
+}
+
+.listings-card-location {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.listings-card-price {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: auto;
+}
+
+/* Larger cards and text on desktop (localhost:5174) */
+@media (min-width: 600px) {
+  .listings-page {
+    max-width: 560px;
+  }
+  .listings-title {
+    font-size: 1.6rem;
+  }
+  .listings-list li {
+    margin-bottom: 1rem;
+  }
+  .listings-card {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .listings-card-img {
+    width: 120px;
+    height: 120px;
+  }
+  .listings-card-body strong {
+    font-size: 1.15rem;
+  }
+  .listings-card-location,
+  .listings-card-price {
+    font-size: 1rem;
+  }
+}

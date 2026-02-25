@@ -27,6 +27,7 @@ describe('MessagesService', () => {
         findUnique: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
+        deleteMany: jest.fn(),
       },
     };
 
@@ -147,6 +148,65 @@ describe('MessagesService', () => {
       (prisma.message.delete as jest.Mock).mockResolvedValue(mockMessage);
       await service.remove(1, 1);
       expect(prisma.message.delete).toHaveBeenCalledWith({ where: { id: 1 } });
+    });
+  });
+
+  describe('removeThread', () => {
+    it('deletes all messages in thread with listingId', async () => {
+      (prisma.message.deleteMany as jest.Mock).mockResolvedValue({ count: 3 });
+      const result = await service.removeThread(1, 2, 10);
+      expect(result).toEqual({ deleted: 3 });
+      expect(prisma.message.deleteMany).toHaveBeenCalledWith({
+        where: {
+          OR: [
+            { senderId: 1, receiverId: 2, listingId: 10 },
+            { senderId: 2, receiverId: 1, listingId: 10 },
+          ],
+        },
+      });
+    });
+
+    it('deletes all messages in thread without listing (listingId null)', async () => {
+      (prisma.message.deleteMany as jest.Mock).mockResolvedValue({ count: 2 });
+      const result = await service.removeThread(1, 2, null);
+      expect(result).toEqual({ deleted: 2 });
+      expect(prisma.message.deleteMany).toHaveBeenCalledWith({
+        where: {
+          OR: [
+            { senderId: 1, receiverId: 2, listingId: null },
+            { senderId: 2, receiverId: 1, listingId: null },
+          ],
+        },
+      });
+    });
+
+    it('deletes all messages in thread when listingId is undefined or 0', async () => {
+      (prisma.message.deleteMany as jest.Mock).mockResolvedValue({ count: 1 });
+      await service.removeThread(5, 6, undefined);
+      expect(prisma.message.deleteMany).toHaveBeenCalledWith({
+        where: {
+          OR: [
+            { senderId: 5, receiverId: 6, listingId: null },
+            { senderId: 6, receiverId: 5, listingId: null },
+          ],
+        },
+      });
+      (prisma.message.deleteMany as jest.Mock).mockResolvedValue({ count: 0 });
+      await service.removeThread(5, 6, 0);
+      expect(prisma.message.deleteMany).toHaveBeenLastCalledWith({
+        where: {
+          OR: [
+            { senderId: 5, receiverId: 6, listingId: null },
+            { senderId: 6, receiverId: 5, listingId: null },
+          ],
+        },
+      });
+    });
+
+    it('returns deleted count from deleteMany', async () => {
+      (prisma.message.deleteMany as jest.Mock).mockResolvedValue({ count: 5 });
+      const result = await service.removeThread(1, 2, 7);
+      expect(result).toEqual({ deleted: 5 });
     });
   });
 });

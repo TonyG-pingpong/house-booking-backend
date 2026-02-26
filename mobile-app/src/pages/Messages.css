@@ -58,6 +58,117 @@
   color: #666;
 }
 
+.messages-thread {
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  background: #f8f8f8;
+  border-radius: 10px;
+}
+
+.messages-thread-new {
+  border: 1px solid #0066cc;
+}
+
+.messages-thread-header {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.messages-thread-with {
+  color: #333;
+}
+
+.messages-thread-listing {
+  font-weight: normal;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.messages-thread-listing a {
+  color: #0066cc;
+}
+
+.messages-thread-context {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.messages-thread-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 0.5rem 0;
+}
+
+.messages-bubble {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  max-width: 85%;
+}
+
+.messages-bubble-me {
+  margin-left: auto;
+  background: #0066cc;
+  color: #fff;
+}
+
+.messages-bubble-them {
+  background: #e5e5e5;
+  color: #333;
+}
+
+.messages-bubble-content {
+  margin: 0 0 0.2rem;
+  font-size: 0.95rem;
+}
+
+.messages-bubble-time {
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+.messages-compose {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  align-items: flex-end;
+}
+
+.messages-compose-input {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  resize: vertical;
+  min-height: 2.5rem;
+}
+
+.messages-compose-btn {
+  padding: 0.5rem 1rem;
+  background: #0066cc;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.messages-compose-btn:disabled {
+  opacity: 0.6;
+}
+
+.messages-send-error {
+  color: #c00;
+  font-size: 0.85rem;
+  margin: 0.25rem 0;
+}
+
+.messages-threads {
+  margin-top: 0.5rem;
+}
+
 @media (min-width: 600px) {
   .messages-page {
     max-width: 560px;

@@ -6,6 +6,7 @@ import ListingDetail from './pages/ListingDetail';
 import Bookings from './pages/Bookings';
 import Messages from './pages/Messages';
 import Profile from './pages/Profile';
+import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import './App.css';
@@ -41,6 +42,7 @@ function AppRoutes() {
         <Route index element={<Navigate to="/listings" replace />} />
         <Route path="listings" element={<Listings />} />
         <Route path="listings/:id" element={<ListingDetail />} />
+        <Route path="dashboard" element={<Dashboard />} />
         <Route path="bookings" element={<Bookings />} />
         <Route path="messages" element={<Messages />} />
         <Route path="profile" element={<Profile />} />

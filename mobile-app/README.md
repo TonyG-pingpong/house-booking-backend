@@ -2,7 +2,9 @@
 
 Capacitor + Vite + React app for iOS and Android. Uses the same backend as the public website.
 
-**Detailed startup (all platforms) and “one sandbox” testing:** see **[../docs/STARTING-THE-APPS.md](../docs/STARTING-THE-APPS.md)**.
+**Detailed startup (all platforms) and “one sandbox” testing:** see **[../docs/STARTING-THE-APPS.md](../docs/STARTING-THE-APPS.md)**.  
+**Step-by-step testing of all features in the Android emulator:** see **[../docs/ANDROID-EMULATOR-TESTING.md](../docs/ANDROID-EMULATOR-TESTING.md)**.  
+**Step-by-step testing on iPhone (iOS Simulator or device, macOS):** see **[../docs/IOS-SIMULATOR-TESTING.md](../docs/IOS-SIMULATOR-TESTING.md)**.
 
 ---
 

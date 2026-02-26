@@ -18,7 +18,7 @@ npm test
 - Watch mode (re-run on file changes): `npm run test:watch`
 - Coverage: `npm run test:cov`
 
-### Frontend (Vite + Vitest)
+### Frontend – public website (Vite + Vitest)
 
 From the **public-website** folder:
 
@@ -29,6 +29,19 @@ npm test
 
 - Runs all `*.test.ts` and `*.spec.ts` files under `src/`.
 - Watch mode: `npm run test:watch`
+
+### Frontend – mobile app (Vite + Vitest)
+
+From the **mobile-app** folder:
+
+```bash
+cd mobile-app
+npm test
+```
+
+- Runs all `*.test.ts` and `*.test.tsx` files under `src/`.
+- Watch mode: `npm run test:watch`
+- Uses jsdom, `@testing-library/react`, and `@testing-library/jest-dom` (see `vitest.setup.ts`).
 
 ---
 
@@ -51,6 +64,14 @@ Services use **mocked** `PrismaService` (no real database).
 |------|------|----------------|
 | API helper | `src/api.test.ts` | `getImageUrl()` for null, empty, absolute URL, relative path; `getMessages()` with and without `since` (instant chat polling) |
 | usePolling hook | `src/hooks/usePolling.test.ts` | callback on mount, callback after interval, disabled does not run, stops on unmount |
+
+### Mobile app
+
+| Area | File | What’s tested |
+|------|------|----------------|
+| API | `src/api.test.ts` | `getImageUrl`, `getMessages` (with/without `since`), `deleteMessageThread` (params, error) |
+| Auth | `src/contexts/AuthContext.test.tsx` | initial load, login success, logout, clearError |
+| Bookings | `src/pages/Bookings.test.tsx` | loading/empty, error, list with listing info |
 
 ---
 
@@ -105,7 +126,7 @@ it('does X when Y', async () => {
 - [ ] Backend: if you add a new controller, consider a `*.controller.spec.ts` that mocks the service.
 - [ ] Frontend: add or extend `*.test.ts` for new API helpers or utils.
 - [ ] Frontend: add `*.test.tsx` for new components/pages that contain important logic or UI.
-- [ ] Run `npm test` (backend) and `npm test` in `public-website` (frontend) before committing.
+- [ ] Run `npm test` (backend), `npm test` in `public-website`, and `npm test` in `mobile-app` before committing.
 
 ---
 

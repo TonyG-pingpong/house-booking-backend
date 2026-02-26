@@ -50,6 +50,67 @@
   color: #c00;
 }
 
+.detail-contact-host {
+  display: inline-block;
+  margin: 0.75rem 0;
+  padding: 0.5rem 1rem;
+  background: #f0f0f0;
+  color: #0066cc;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.detail-booking-form {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.detail-booking-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.detail-booking-label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.detail-booking-input {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.detail-booking-error {
+  color: #c00;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.detail-booking-btn {
+  margin-top: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  background: #0066cc;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.detail-booking-btn:disabled {
+  opacity: 0.7;
+}
+
 @media (min-width: 600px) {
   .listing-detail {
     max-width: 560px;

@@ -11,6 +11,9 @@ export default function TabLayout() {
         <NavLink to="/listings" className={({ isActive }) => (isActive ? 'tab-link active' : 'tab-link')} end>
           Listings
         </NavLink>
+        <NavLink to="/dashboard" className={({ isActive }) => (isActive ? 'tab-link active' : 'tab-link')}>
+          Dashboard
+        </NavLink>
         <NavLink to="/bookings" className={({ isActive }) => (isActive ? 'tab-link active' : 'tab-link')}>
           Bookings
         </NavLink>

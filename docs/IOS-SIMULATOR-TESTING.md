@@ -6,8 +6,8 @@ Step-by-step guide to run the House Booking mobile app on **iOS Simulator** or a
 
 ## Prerequisites
 
-- **Mac** with macOS.
-- **Xcode** from the [App Store](https://apps.apple.com/app/xcode/id497799835). Open Xcode once and accept the license; install any requested components. The **iOS Simulator** is included with Xcode.
+- **Mac** with macOS. Your Mac must support a macOS version that can run Xcode (see [Xcode not supported](#xcode-not-supported-on-this-mac) if you get “not supported”).
+- **Xcode** from the [App Store](https://apps.apple.com/app/xcode/id497799835) or [Apple Developer Downloads](https://developer.apple.com/download/all/). Open Xcode once and accept the license; install any requested components. The **iOS Simulator** is included with Xcode.
 - **Node.js** (e.g. 18+) and **npm**.
 - **Backend** running so the app can reach the API (e.g. from your Windows machine or from the Mac—see “Backend” below).
 
@@ -145,6 +145,27 @@ Use the same flow as on Android to verify behavior:
 | CocoaPods / pod install errors | In `mobile-app/ios` run `pod install` (install CocoaPods with `sudo gem install cocoapods` if needed). Then from `mobile-app`: `npx cap sync ios` and `npm run ios` again. |
 | Real device: “Untrusted Developer” | On the iPhone: **Settings → General → VPN & Device Management** → tap your developer profile → **Trust**. |
 | Real device: signing errors in Xcode | In Xcode: select the **House Booking** project → **Signing & Capabilities** → select your **Team** (Apple ID). |
+| **Xcode not supported on this Mac** | See [Xcode not supported on this Mac](#xcode-not-supported-on-this-mac) below. |
+
+### Xcode not supported on this Mac
+
+This usually means your **macOS version is too old** for the Xcode you tried to install. Xcode requires a minimum macOS version (e.g. Xcode 16 → macOS Sonoma 14.5+; Xcode 15 → macOS Ventura 13.5+).
+
+**Option 1: Upgrade macOS (best fix)**  
+1. Check your version: **Apple menu () → About This Mac**.  
+2. If an update is available: **System Settings → General → Software Update** (or **System Preferences → Software Update** on older macOS).  
+3. Upgrade to the latest macOS your Mac supports.  
+4. Then install Xcode again from the App Store or from [developer.apple.com/download/all](https://developer.apple.com/download/all/).
+
+**Option 2: Install an older Xcode**  
+If you **cannot** upgrade macOS (e.g. your Mac is too old for the latest macOS):  
+1. Go to [developer.apple.com/download/all](https://developer.apple.com/download/all/) (sign in with your Apple ID).  
+2. Find an **older Xcode** whose “Minimum version” matches your macOS (e.g. Xcode 14 for Monterey 12.5+, Xcode 13 for Monterey 12.0+).  
+3. Download the `.xip`, open it, drag **Xcode.app** to **Applications**, then open Xcode once and accept the license.
+
+**Option 3: Use another Mac or skip iOS for now**  
+- Test the app in the **browser** or on **Android** (see [ANDROID-EMULATOR-TESTING.md](ANDROID-EMULATOR-TESTING.md)).  
+- To build/run on iOS later, use a Mac that supports a current macOS and Xcode, or a cloud Mac build service.
 
 ---
 

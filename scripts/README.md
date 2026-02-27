@@ -4,6 +4,9 @@ Helper scripts for the House Booking project.
 
 | Script | Platform | Purpose |
 |--------|----------|---------|
+| **set-mobile-env.js** | All | Interactive: choose Mac or PC and optionally a custom backend URL; updates `mobile-app/.env` automatically. Run: `node scripts/set-mobile-env.js` from project root. |
+| **set-mobile-env.bat** | Windows | Same as above. Run `scripts\set-mobile-env.bat` from project root. |
+| **set-mobile-env.sh** | macOS / Linux | Same as above. `chmod +x scripts/set-mobile-env.sh` once, then `./scripts/set-mobile-env.sh` from project root. |
 | **run-mobile-browser.bat** | Windows | Start the mobile app dev server for testing in the browser (http://localhost:5174). Run from **project root**. Backend (e.g. start.bat) should be running. |
 | **install-android-emulator.ps1** | Windows | Install Android Studio via winget and set ANDROID_HOME. Run once before using the Android emulator. |
 | **run-android-emulator.bat** | Windows | Build app, sync Capacitor, start Android emulator (if needed), install and launch the app. Run from **project root**. |
@@ -15,10 +18,10 @@ Helper scripts for the House Booking project.
 **Quick start (Windows – Android):**
 1. Run `.\scripts\install-android-emulator.ps1` (once).
 2. Open Android Studio → Device Manager → Create Device (e.g. Pixel 6, API 34).
-3. Start backend (e.g. `start.bat`). In `mobile-app\.env` set `VITE_API_URL=http://10.0.2.2:3000`.
+3. Start backend (e.g. `start.bat`). Run `scripts\set-mobile-env.bat` and choose **PC** to set `VITE_API_URL` automatically (or set `VITE_API_URL=http://10.0.2.2:3000` in `mobile-app\.env`).
 4. Run `scripts\run-android-emulator.bat` from project root.
 
 **Quick start (macOS – iOS):**
 1. Install Xcode from the App Store and open it once.
-2. Start backend. In `mobile-app\.env` set `VITE_API_URL=http://localhost:3000`.
+2. Start backend. Run `./scripts/set-mobile-env.sh` and choose **Mac** to set `VITE_API_URL` automatically (or set `VITE_API_URL=http://localhost:3000` in `mobile-app/.env`).
 3. Run `./scripts/run-ios-simulator.sh` from project root (optionally pass a device name, e.g. `"iPhone 15"`).

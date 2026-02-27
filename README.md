@@ -95,6 +95,43 @@ Everyone can sign up, add listings, book, and use messages. Each person uses the
 
 ---
 
+## Restore on another machine
+
+To get this project running on a new computer (e.g. after cloning from GitHub):
+
+1. **Clone the repo** (use your branch if you have one):
+   ```bash
+   git clone https://github.com/TonyG-pingpong/house-booking-backend.git
+   cd house-booking-backend
+   git checkout host-dashboard
+   ```
+   Omit `git checkout host-dashboard` if you use the default branch.
+
+2. **Backend** (from project root):
+   ```bash
+   npm install
+   npm run start:dev
+   ```
+   Or use `start.bat` on Windows. Backend runs at http://localhost:3000.
+
+3. **Public website** (optional): from `public-website`, run `npm install` then `npm run dev`. See [docs/STARTING-THE-APPS.md](docs/STARTING-THE-APPS.md).
+
+4. **Mobile app** (optional): from `mobile-app`:
+   ```bash
+   npm install
+   cp .env.example .env
+   ```
+   Edit `.env` and set `VITE_API_URL` (e.g. `http://localhost:3000` for same machine, or your PC’s LAN IP for a device). Then:
+   ```bash
+   npm run build
+   ```
+   For **Android**: `npx cap add android`, then `npx cap sync`; open the project in Android Studio and run.  
+   For **iOS** (Mac only): `npx cap add ios`, then `npx cap sync`; run `npm run ios` to open in Xcode.
+
+See [docs/STARTING-THE-APPS.md](docs/STARTING-THE-APPS.md) and [mobile-app/README.md](mobile-app/README.md) for full startup and testing guides.
+
+---
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.

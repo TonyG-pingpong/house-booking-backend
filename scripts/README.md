@@ -4,6 +4,9 @@ Helper scripts for the House Booking project.
 
 | Script | Platform | Purpose |
 |--------|----------|---------|
+| **start.bat** | Windows | Start backend + frontend (stops existing processes on 3000/5173, then runs `npm run start:all`). Double‑click or run from project root. |
+| **start.sh** | macOS / Linux | Same as start.bat. Run `./start.sh` from project root (or `node scripts/start.js` on any platform). |
+| **start.js** | All | Cross‑platform logic used by start.bat and start.sh. Run `node scripts/start.js` from project root. |
 | **set-mobile-env.js** | All | Interactive: choose Mac or PC and optionally a custom backend URL; updates `mobile-app/.env` automatically. Run: `node scripts/set-mobile-env.js` from project root. |
 | **set-mobile-env.bat** | Windows | Same as above. Run `scripts\set-mobile-env.bat` from project root. |
 | **set-mobile-env.sh** | macOS / Linux | Same as above. `chmod +x scripts/set-mobile-env.sh` once, then `./scripts/set-mobile-env.sh` from project root. |

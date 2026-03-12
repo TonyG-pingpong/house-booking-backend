@@ -24,7 +24,15 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   if (token) {
     (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
   }
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Network error';
+    throw new Error(
+      `Cannot reach server at ${API_BASE}. Is the backend running? Same Wi‑Fi? (${msg})`
+    );
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
     throw new Error(err.message ?? res.statusText);
